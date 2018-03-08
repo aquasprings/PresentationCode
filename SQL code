@@ -1,0 +1,64 @@
+use db01tms55_1718
+
+create table tableitem1349205
+(
+	ItemId int ,
+	ItemName varchar(20),
+	Price int,
+	ManufacturingDate datetime,
+	QuantityAvailable int
+	 
+); 
+create table tablecart1349205_1
+(
+	orderid int identity(1,1),
+	ItemName varchar(20),
+	QuantityNeeded int,
+	TotalPrice int,
+	CustomerName varchar(20),
+	Contact bigint,
+	Email varchar(30),
+	OrderDate datetime default 'getdate()',
+	
+);
+
+select * from tableitem1349205
+
+select * from tablecart1349205_1
+
+insert into tableitem1349205 values (104,'Laptop',35000,'2017-01-01',3);
+
+create proc sp_insert1349205_2
+@oid int out,@itemname varchar(20),@qn int,@tp int, @cname varchar(20),@con bigint,@e varchar(30),@od datetime
+as
+begin
+insert into tablecart1349205_1 values(@itemname,@qn,@tp,@cname,@con,@e,@od);
+update tableitem1349205
+set QuantityAvailable= QuantityAvailable- @qn where ItemName= @itemname;
+set @oid=@@IDENTITY;
+end;
+
+create proc sp_view1349205
+as
+begin
+select  orderid,t1.ItemName,QuantityNeeded,TotalPrice,CustomerName,Contact,Email,OrderDate,ManufacturingDate  
+from tablecart1349205_1 t1 join tableitem1349205 t2 on t1.ItemName= t2.ItemName; 
+
+end;
+
+
+create proc sp_delete1349205_1
+@id1 int
+as
+begin 
+update tableitem1349205
+	set QuantityAvailable = QuantityAvailable+(SELECT QuantityNeeded from tablecart1349205_1 where orderID=@id1)
+	where itemName = (SELECT itemName from tablecart1349205_1 where orderID= @id1);
+
+delete from tablecart1349205_1 where orderid=@id1;
+end
+
+
+
+	
+	
